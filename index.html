@@ -98,25 +98,23 @@
             renderer.render(scene, camera);
             var lastTimeMsec = null
                 requestAnimationFrame(function animate(nowMsec) {
-                    if(cube2.position.x<10 && !rebote){
-                        if(cube2.position.x==10){
-                            rebote=true;
-                        }else{
-                            cube2.position.x +=0.5;
-                        }
-                    }else{
-                        if(cube2.position.x >-10){
-                            cube2.position.x -=0.5;
-                        }else{
-                         rebote=false;
-                        }
-
+                    if(cube2.position.x<20 && !rebote){
+                        cube2.position.x +=0.5;
                     }
-                    /*cube2.position.x
-                        box.position.set(
-                            Math.random() * 50 - 25,
-                            20 + Math.random() * 5,
-                            Math.random() * 5
+                    if(cube2.position.x==19.5){
+                        rebote=true;
+                    }
+                    if(cube2.position.x>-20 && rebote){
+                        cube2.position.x -=0.5;
+                    }
+                    if(cube2.position.x==-19.5){
+                        rebote=false;
+                    }   
+
+                    /*box.position.set(
+                        Math.random() * 50 - 25,
+                        20 + Math.random() * 5,
+                        Math.random() * 5
                     );*/
 
 
