@@ -17,6 +17,7 @@
         integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q=="
         crossorigin="anonymous"></script>
     <script src = "https://stemkoski.github.io/Three.js/js/THREEx.KeyboardState.js"></script>
+    <script src = "https://cdn.jsdelivr.net/npm/physijs-webpack@0.1.4/webpack.min.js"></script>
     <script>
         var stats;
         var scene, camera, render;
@@ -25,6 +26,7 @@
         var cube2;
         var rebote=false;
         function createCamera() {
+            scene = new Physijs.Scene({reportSize: 10, fixedTimeStep: 1 / 60});
             camera = new THREE.PerspectiveCamera(
                 75,
                 window.innerWidth / window.innerHeight,
@@ -32,6 +34,8 @@
                 100
             );
             camera.position.set(0, 0, 20);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            scene.add(camera);
         }
         function createRenderer() {
             renderer = new THREE.WebGLRenderer();
