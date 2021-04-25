@@ -9,24 +9,28 @@
 </head>
 
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r96/three.min.js"
-        integrity="sha512-NjX12CQ0AQVVlDqq2swO9HW1puo/zrUIWlyK1B+7qrb7LU0iVHugZCNxjyyffGnZxr4DXe+eC25duPOsiwzBdw=="
-        crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="../libs/three.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"
         integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q=="
         crossorigin="anonymous"></script>
     <script src = "https://stemkoski.github.io/Three.js/js/THREEx.KeyboardState.js"></script>
-    <script src = "https://cdn.jsdelivr.net/npm/physijs-webpack@0.1.4/webpack.min.js"></script>
+    <script type="text/javascript" src="../libs/physi.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/chroma.js"></script>
     <script>
+        Physijs.scripts.worker = '../libs/physijs_worker.js';
+        Physijs.scripts.ammo = '../libs/ammo.js';
         var stats;
         var scene, camera, render;
         var updateFcts	= [];
         var cube;
         var cube2;
-        var rebote=false;
+        var rebote=false,rebote2=false;
+        var s,s2;
+
         function createCamera() {
-            scene = new Physijs.Scene({reportSize: 10, fixedTimeStep: 1 / 60});
             camera = new THREE.PerspectiveCamera(
                 75,
                 window.innerWidth / window.innerHeight,
@@ -34,11 +38,11 @@
                 100
             );
             camera.position.set(0, 0, 20);
-            camera.lookAt(new THREE.Vector3(0, 0, 0));
-            scene.add(camera);
+            camera.lookAt(new THREE.Vector3(0, 0, 20));
         }
         function createRenderer() {
             renderer = new THREE.WebGLRenderer();
+            renderer.shadowMapEnabled = true;
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(new THREE.Color(0xffffff));
             document.body.appendChild(renderer.domElement);
@@ -53,11 +57,15 @@
         }
         
         function createCube1() { 
-            var planeGeometry = new THREE.BoxGeometry(6, 1, 1); 
-            var planeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); 
-            cube= new THREE.Mesh(planeGeometry, planeMaterial);
+            let planeGeometry = new THREE.BoxGeometry(6, 1, 1); 
+            cube = new Physijs.BoxMesh(planeGeometry);
             cube.position.set(0,-11,0); 
-            scene.add(cube); 
+            scene.add(cube);
+            cube.castShadow = true;
+            let constraint = new Physijs.SliderConstraint(cube, new THREE.Vector3(0, -110, 0), new THREE.Vector3(0, 1, 0));
+            scene.addConstraint(constraint);
+            /*constraint.setLimits(-10, 10, 10, -10);
+            constraint.setRestitution(0,0);*/
         }
         function createCube2() { 
             var planeGeometry = new THREE.BoxGeometry(6, 1, 1); 
@@ -68,17 +76,19 @@
         }
 
         function createballoon() { 
-            var planeGeometry = new THREE.SphereGeometry(1, 20, 20); 
-            var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); 
-            var s = new THREE.Mesh(planeGeometry, planeMaterial);
+            let planeGeometry1 = new THREE.SphereGeometry(1, 10, 10);  
+            s = new Physijs.SphereMesh(planeGeometry1);
             s.position.set(0,0,0); 
+            s.castShadow = true;
             scene.add(s); 
+            let constraint = new Physijs.PointConstraint(s,s,s.position);
+            scene.addConstraint(constraint);
         }
 
         function init() {
             //create scene
             createCamera();
-            scene = new THREE.Scene();
+            scene = new Physijs.Scene({reportSize: 10, fixedTimeStep: 1 / 60});
             createPlane();
             createCube1();
             createCube2();
@@ -96,12 +106,13 @@
         }
             init();
             updateFcts.push(function(){
-                renderer.render( scene, camera );		
+                renderer.render( scene, camera );	
+                
             })
 
-            renderer.render(scene, camera);
             var lastTimeMsec = null
                 requestAnimationFrame(function animate(nowMsec) {
+                    	
                     if(cube2.position.x<20 && !rebote){
                         cube2.position.x +=0.5;
                     }
@@ -114,17 +125,9 @@
                     if(cube2.position.x==-19.5){
                         rebote=false;
                     }   
-
-                    /*box.position.set(
-                        Math.random() * 50 - 25,
-                        20 + Math.random() * 5,
-                        Math.random() * 5
-                    );*/
-
-
-
                     // keep looping
                     requestAnimationFrame(animate);
+                    scene.simulate();
                     // measure time
                     lastTimeMsec = lastTimeMsec || nowMsec - 1000 / 60
                     var deltaMsec = Math.min(200, nowMsec - lastTimeMsec)
@@ -133,7 +136,10 @@
                     updateFcts.forEach(function (updateFn) {
                         updateFn(deltaMsec / 1000, nowMsec / 1000)
                     })
+                    
                 })
+            
+
         
 
 
