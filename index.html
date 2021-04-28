@@ -85,9 +85,13 @@
             var keyboard = new THREEx.KeyboardState(renderer.domElement);
             updateFcts.push(function (delta, now) {
                 if (keyboard.pressed('left')) {
-                    cube.position.x -= 0.5 ;
+                    if(cube.position.x>=-14){
+                        cube.position.x -= 0.5 ;
+                    }
                 } else if (keyboard.pressed('right')) {
-                    cube.position.x += 0.5 ;
+                    if(cube.position.x<=14){
+                        cube.position.x += 0.5 ;
+                    }
                 }
             })
             //element render
